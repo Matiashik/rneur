@@ -88,7 +88,7 @@ impl NeurNet {
         }
     }
 
-    pub fn calc(&mut self) -> f64 {
+    pub fn calc(&mut self) -> Vec<f64> {
         for lyr in 1..self.neur_lyr.len() {
             for ner in 0..self.neur_lyr[lyr].len() {
                 self.neur_lyr[lyr][ner].val = 0.0;
@@ -102,17 +102,28 @@ impl NeurNet {
                 self.neur_lyr[lyr][ner].val = sigm(self.neur_lyr[lyr][ner].val);
             }
         }
-        return self.neur_lyr.last().unwrap()[0].val;
+        let mut res: Vec<f64> = Vec::new();
+        for i in 0..self.neur_lyr.last().unwrap().len() {
+            res.push(self.neur_lyr.last().unwrap()[i].val);
+        }
+        return res;
     }
 
-    pub fn estimate(&self, expected: f64) -> f64 {
-        return err(expected, self.neur_lyr.last().unwrap()[0].val);
+    pub fn estimate(&self, expected: Vec<f64>) -> Vec<f64> {
+        let mut res: Vec<f64> = Vec::new();
+        for i in 0..expected.len() {
+            res.push(err(expected[i], self.neur_lyr.last().unwrap()[i].val));
+        }
+        return res;
     }
 
-    pub fn tune(&mut self, expected: f64) {
+    pub fn tune(&mut self, expected: Vec<f64>) {
         let ln = self.neur_lyr.len();
-        self.neur_lyr[ln - 1][0].delta = (expected - self.neur_lyr.last().unwrap()[0].val)
-            * dsigm(self.neur_lyr.last().unwrap()[0].val);
+        for ner in 0..self.neur_lyr[ln - 1].len() {
+            self.neur_lyr[ln - 1][ner].delta = (expected[ner]
+                - self.neur_lyr.last().unwrap()[ner].val)
+                * dsigm(self.neur_lyr.last().unwrap()[ner].val);
+        }
         for lyr in (0..ln - 1).rev() {
             for ner in 0..self.neur_lyr[lyr].len() {
                 self.neur_lyr[lyr][ner].delta = 0.0;

@@ -15,8 +15,8 @@ fn main() {
         for s in study {
             net.define(vec![s[0], s[1]]);
             net.calc();
-            er += net.estimate(s[2]);
-            net.tune(s[2]);
+            er += net.estimate(vec![s[2]])[0];
+            net.tune(vec![s[2]]);
         }
         print!("\r{}:{}", i, er / 4.0);
     }
